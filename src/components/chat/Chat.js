@@ -1,57 +1,76 @@
 import "./Chat.css";
 import { Avatar } from "@mui/material";
 import { useState, useEffect } from "react";
-import { MoreVert, AttachFile, SearchOutlined, InsertEmoticon, MicOutlined } from "@mui/icons-material";
+import {
+  MoreVert,
+  AttachFile,
+  SearchOutlined,
+  InsertEmoticon,
+  MicOutlined,
+} from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 
 function Chat() {
   const [seed, setSeed] = useState("");
+  const [input, setInput] = useState("");
 
   useEffect(() => {
     setSeed(Math.floor(Math.random() * 5000));
   }, []);
+
+  const sendMessage = (e) => {
+    e.preventDefault()
+    console.log(input)
+    setInput('')
+  };
 
   return (
     <div className="chat">
       <div className="chat__header">
         <Avatar src={`https://avatars.dicebear.com/api/human/${seed}.svg`} />
 
-      <div className="chat__headerInfo">
-        <h3>Room Name</h3>
-        <p>Last seen...</p>
-      </div>
+        <div className="chat__headerInfo">
+          <h3>Room Name</h3>
+          <p>Last seen...</p>
+        </div>
 
-      <div className="chat__headerRight">
-        <IconButton>
-          <SearchOutlined />
-        </IconButton>
-        <IconButton>
-          <AttachFile />
-        </IconButton>
-        <IconButton>
-          <MoreVert />
-        </IconButton>
-      </div>
+        <div className="chat__headerRight">
+          <IconButton>
+            <SearchOutlined />
+          </IconButton>
+          <IconButton>
+            <AttachFile />
+          </IconButton>
+          <IconButton>
+            <MoreVert />
+          </IconButton>
+        </div>
       </div>
 
       <div className="chat__body">
         <p className={`chat__message ${true && "chat__receiver"}`}>
-            <span className="chat__name"> Anabia Alam </span>
-            Yaar neend arahi haiiii
-            <span className="chat__timestamp">4:05 pm</span>
+          <span className="chat__name"> Anabia Alam </span>
+          Yaar neend arahi haiiii
+          <span className="chat__timestamp">4:05 pm</span>
         </p>
       </div>
 
       <div className="chat__footer">
         <InsertEmoticon />
         <form>
-            <input type='text' />
-            <button>Send a message</button>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            type="text"
+            placeholder="Type a message..."
+          />
+          <button type="submit" onClick={sendMessage}>
+            Send a message
+          </button>
         </form>
         <MicOutlined />
       </div>
     </div>
-
   );
 }
 
