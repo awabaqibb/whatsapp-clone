@@ -1,3 +1,5 @@
+import db from "../../firebase.config";
+import {useParams} from 'react-router-dom'
 import "./Chat.css";
 import { Avatar } from "@mui/material";
 import { useState, useEffect } from "react";
@@ -8,15 +10,35 @@ import {
   InsertEmoticon,
   MicOutlined,
 } from "@mui/icons-material";
+import {
+  doc,
+  onSnapshot,
+} from "firebase/firestore";
+
 import { IconButton } from "@mui/material";
 
 function Chat() {
   const [seed, setSeed] = useState("");
   const [input, setInput] = useState("");
+  const {roomId} = useParams()
+  const [roomName, setRoomName] = useState("")
+  const [messages, setMessages] = useState("")
 
   useEffect(() => {
     setSeed(Math.floor(Math.random() * 5000));
-  }, []);
+
+    if(roomId){
+      console.log(roomId)
+      const colRef = doc(db, "rooms", roomId)
+      onSnapshot(colRef, (snapshot) => (
+        setRoomName(snapshot.data().name)
+      ))
+      
+      colRef.collection("messages").orderBy("timestamp", "asc").onSnapshot(
+        (snapshot)=> setMessages(snapshot.docs.map((doc) => doc.data()))
+      )
+    }
+  }, [roomId]);
 
   const sendMessage = (e) => {
     e.preventDefault()
@@ -30,7 +52,7 @@ function Chat() {
         <Avatar src={`https://avatars.dicebear.com/api/human/${seed}.svg`} />
 
         <div className="chat__headerInfo">
-          <h3>Room Name</h3>
+          <h3>{roomName}</h3>
           <p>Last seen...</p>
         </div>
 
@@ -48,11 +70,14 @@ function Chat() {
       </div>
 
       <div className="chat__body">
-        <p className={`chat__message ${true && "chat__receiver"}`}>
-          <span className="chat__name"> Anabia Alam </span>
-          Yaar neend arahi haiiii
-          <span className="chat__timestamp">4:05 pm</span>
+        {messages.map((message)=>(
+          <p className={`chat__message ${true && "chat__receiver"}`}>
+          <span className="chat__name"> {message.name} </span>
+          {message.message}
+          <span className="chat__timestamp">{new Date(message.timestamp?.toDate()).toUTCString()}</span>
         </p>
+        ))}
+        
       </div>
 
       <div className="chat__footer">

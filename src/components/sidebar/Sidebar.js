@@ -11,7 +11,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import {
   doc,
-  getDocs,
+  getDoc,
   onSnapshot,
   collection,
   query,
@@ -19,25 +19,29 @@ import {
 } from "firebase/firestore";
 
 import db from "../../firebase.config";
+import { useStateValue } from "../../StateProvider";
 
 function Sidebar() {
   //state
   const [rooms, setRooms] = useState([]);
+  const [{ user }, dispatch] = useStateValue()
 
-  //firestore reader
-  const reader = async () => {
-    const querySnapshot = await getDocs(collection(db, "rooms"));
-    
-    querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data());
-    });
-  };
+    useEffect(() => {
+      const data = []
+      const colRef = collection(db, "rooms")
 
-  ////////////////////////////////////////////////////////////////
+      const unsubscribe= onSnapshot(colRef, (snapshot) => {
+          snapshot.docs.forEach((doc) => {
+              data.push({id: doc.id, data: doc.data()});
+          })
+          setRooms(data)
+      })
+      return() => {
+        unsubscribe()
+      }
+  }, [])
 
-  useEffect(() => {
-    reader();
-  }, []);
+  console.log(rooms);
 
   return (
     <div className="sidebar">
@@ -63,13 +67,11 @@ function Sidebar() {
         </div>
       </div>
 
-      <div className="sidebar__chats">
+      <div className="sidebar__ch ats">
         <SidebarChat addNewChat={true} />
         {rooms.map((room) => (
           <SidebarChat key={room.id} id={room.id} name={room.data.name} />
         ))}
-
-        <SidebarChat />
       </div>
     </div>
   );
